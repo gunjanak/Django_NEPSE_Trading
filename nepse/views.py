@@ -3,9 +3,11 @@ from django.http import HttpResponse
 
 import json
 
+
 from .forms import MyForm
 
-from .trading import nepse_symbols, stock_dataFrame
+from .trading import (nepse_symbols, stock_dataFrame,obv_column,buy_sell_obv,
+                      jcs_signals)
 
 # Create your views here.
 def homePageView(request):
@@ -24,18 +26,44 @@ def nepseData(request):
             upper_str= input_string.upper()
             try:
                 df = stock_dataFrame(upper_str)
-                df = df.reset_index()
-                df['Date'] = df['Date'].astype(str)
-                processed_data = df.head(100)
-                print(processed_data)
                 
-                processed_data_json = processed_data.to_json(orient='records')
-                print(processed_data_json)
-                # Extract column names
-                column_names = processed_data.columns.tolist()
 
-            except:
-                pass
+            except Exception as e:
+                error_message = f"An error occurred: {str(e)}"
+                return render(request,"nepse/form.html",{'form':form,
+                                                        "error_message":error_message,
+                                                     "stock_symbols":stock_symbols})
+            
+            
+            verdict = {}
+            #send data to calculate obv
+            obv_df = df.copy()
+            obv_df = obv_column(obv_df)
+            obv_df = obv_df[['OBV']]
+            # print(obv_df)
+            obv_b_s = buy_sell_obv(obv_df)
+            obv_verdict = obv_b_s.iloc[-1,-1]
+            verdict["OBV"] = obv_verdict
+            # print(verdict)
+
+            #Send data to calculate jcs signals
+            print(df)
+            jcs_df = df.copy()
+            jcs_df = jcs_signals(jcs_df)
+            jcs_df = jcs_df[["Bullish swing","Bearish swing"]]
+            print(jcs_df)
+            
+
+
+            df = df.reset_index()
+            df['Date'] = df['Date'].astype(str)
+            processed_data = df[::-1]
+            
+            
+            processed_data_json = processed_data.to_json(orient='records')
+            
+            # Extract column names
+            column_names = processed_data.columns.tolist()
 
 
             return render(request,"nepse/form.html",{'form':form,
