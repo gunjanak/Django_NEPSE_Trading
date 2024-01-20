@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    </head>
+    <body>
+        <form method="post" action="{% url 'nepse_data' %}">
+            {% csrf_token %}
+            
+           {#Single input field with auto-suggestions #}
+           <input type="text" id="suggestionInput" list="stockSymbolsList" name="input_string" placeholder="Stock Symbols">
+           <datalist id="stockSymbolsList">
+                {% for symbol in stock_symbols %}
+                    <option value="{{ symbol }}">
+                {% endfor %}
+           </datalist>
+           <button type="submit">
+            Submit
+           </button>
+          </form>
+        
+        <h2>
+            Data
+        </h2>
+        
+        {% if processed_data_json %}
+            <div class="data-canvas">
+                <div class="table-container" id="table-container">
+                    <table class="table" id="data-table">
+                        <thead>
+                            <tr>
+                                {% for column_name in column_names %}
+                                    <th>
+                                        {{column_name}}
+                                    </th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody id="data-body">
+
+                        </tbody>
+                    </table>
+                </div>
+                <div id="pagination-container">
+                    <button id="load-more-btn">
+                        Load more
+                    </button>
+                </div>
+            </div>
+            
+        {% else %}
+            <p>
+                No data to display
+            </p>
+
+        {% endif %}
+
+        <script>
+            document.addEventListener("DOMContentLoaded",function(){
+                var visibleRows = 20;
+                var totalRows = {{processed_data_json|length}};
+                var rowsLoaded  = visibleRows;
+                var jsonData = {{ processed_data_json|safe }}
+                var columnNames = {{column_names|safe }};
+
+                function loadRows(){
+                    var tableBody = document.getElementById('data-body');
+                    for (var i =  rowsLoaded; i<rowsLoaded+visibleRows; i++) {
+                        if (i >= totalRows){
+                            console.log("Done");
+                            document.getElementById('pagination-container').style.display = 'none';
+                            break;
+                        }
+
+                        var row = document.createElement('tr');
+                        for (var j=0; j<columnNames.length; j++){
+                            var cell = document.createElement('td');
+                            cell.textContent = jsonData[i][columnNames[j]];
+                            row.appendChild(cell);
+                        }
+                        tableBody.appendChild(row);
+
+                    }
+                    rowsLoaded += visibleRows;
+
+                }
+
+                
+
+                //Initial load
+                loadRows();
+
+               // Load more button click event
+                document.getElementById('load-more-btn').addEventListener('click', function () {
+                    loadRows();
+                });
+
+            });
+
+            $(document).ready(function (){
+                
+                function updateSuggestions() {
+                    var input = $("#suggestionInput").val().toUpperCase();
+                    var options = $("#stockSymbolsList option");
+
+                    options.each(function () {
+                        var symbol = $(this).val().toUpperCase();
+                        if(symbol.indexOf(input) === -1) {
+                            $(this).hide();
+
+                        }else {
+                            $(this).show();
+                        }
+
+                    });
+
+                }
+                //Function to update auto-suggestions based on user input
+                $("#suggestionInput").on("input",function (){
+                    console.log("update");
+                    updateSuggestions();
+
+                });
+
+                //Initial update when the page is loaded
+                updateSuggestions();
+                
+            });
+        </script>
+    </body>
+
+
+</html>
+
