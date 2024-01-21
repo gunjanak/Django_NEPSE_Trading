@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 import requests
 import re
 import math
-
+import talib as ta
 #All the stock symbols
 def nepse_symbols():
     path = 'https://merolagani.com/LatestMarket.aspx'
@@ -282,3 +282,78 @@ def profit_macd(company_df,seed_money=10000):
       flag = 0
 
   return [shares*company_df3['Close'][-1] + money,shares,money]
+
+
+#Stochastic oscillator
+def stochastic_os(df):
+  company_df = df.dropna()
+  #Stochastic
+  slowk, slowd = ta.STOCH(company_df['High'], company_df['Low'], company_df['Close'], fastk_period=5, slowk_period=3, slowk_matype=0, slowd_period=3, slowd_matype=0)
+  company_df['Slowk'] = slowk
+  company_df['Slowd'] = slowd
+  company_df2 = company_df.dropna()
+  company_df2['Difference'] = company_df2['Slowk'] - company_df2['Slowd']
+  company_df2['Lowest_Slowk'] = company_df2['Slowk'].rolling(window=5).min()
+  company_df2['Highest_Slowk'] = company_df2['Slowk'].rolling(window=5).max()
+  company_df5 = company_df2.dropna()
+
+  length = len(company_df5)
+  return company_df5
+
+def buy_sell_stochastic_os(df):
+  length = len(df)
+
+  buy_sell = []
+  for i in range(0,(length),1):
+    if((df['Difference'][i]>0) & (df['Lowest_Slowk'][i]<20)):
+      buy_sell.append("Buy")
+    elif (df['Difference'][i]<0) & (df['Highest_Slowk'][i]>80):
+      buy_sell.append("Sell")
+    else:
+      buy_sell.append("Hold")
+  
+  df['Buy_Sell'] = buy_sell
+  return df
+
+
+#ADX
+def adx(df):
+  company_df = df.dropna()
+  # Average Directional Movement Index(Momentum Indicator)
+  company_df['avg'] = ta.ADX(company_df['High'],company_df['Low'], company_df['Close'], timeperiod=20)
+  company_df['Plus_DI'] = ta.PLUS_DI(company_df['High'],company_df['Low'], company_df['Close'], timeperiod=20)
+  company_df['Minus_DI'] = ta.MINUS_DI(company_df['High'],company_df['Low'], company_df['Close'], timeperiod=20)
+
+  company_df2 = company_df
+
+  company_df5 = company_df2[['Close','avg','Plus_DI','Minus_DI']]
+
+  company_df5['Diff'] = company_df5['Plus_DI']-company_df5['Minus_DI']
+  company_df5 = company_df5.dropna()
+
+  return company_df5
+
+
+def buy_sell_adx(df):
+  length = len(df)
+  buy_sell = []
+  for i in range(1,(length),1):
+    if (df['avg'][i]>20):
+      if (df['Diff'][i]<0) & (df['Diff'][i-1]>0):
+        buy_sell.append("Sell")
+      elif (df['Diff'][i]>0) & (df['Diff'][i-1]<0):
+        buy_sell.append("Buy")
+      else:
+        buy_sell.append("Hold")
+    else:
+      buy_sell.append("Hold")
+
+    # Drop first row
+  df.drop(index=df.index[0], 
+          axis=0, 
+          inplace=True)
+  df['Buy_Sell'] = buy_sell
+
+  return df
+
+

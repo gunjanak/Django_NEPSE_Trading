@@ -7,7 +7,8 @@ import json
 from .forms import MyForm
 
 from .trading import (nepse_symbols, stock_dataFrame,obv_column,buy_sell_obv,
-                      jcs_signals,macd,buy_sell_macd)
+                      jcs_signals,macd,buy_sell_macd,stochastic_os,buy_sell_stochastic_os,
+                      adx,buy_sell_adx)
 
 # Create your views here.
 def homePageView(request):
@@ -73,6 +74,22 @@ def nepseData(request):
             print(true_count)
             macd_verdict = macd_df.iloc[-1,-1]
             verdict["MACD"] = macd_verdict
+
+            #Send data to Stochastic Oscillator
+            stochastic_df = df.copy()
+            stochastic_df = stochastic_os(stochastic_df)
+            stochastic_df = buy_sell_stochastic_os(stochastic_df)
+            stochastic_os_verdict = stochastic_df.iloc[-1,-1]
+            print(stochastic_df)
+            verdict["Stochastic Oscillator"] = stochastic_os_verdict
+
+            #Send data to adx
+            adx_df = df.copy()
+            adx_df = adx(df)
+            adx_df = buy_sell_adx(adx_df)
+            print(adx_df)
+            adx_verdict = adx_df.iloc[-1,-1]
+            verdict["ADX"] = adx_verdict
 
 
             print(verdict)
