@@ -7,7 +7,7 @@ import json
 from .forms import MyForm
 
 from .trading import (nepse_symbols, stock_dataFrame,obv_column,buy_sell_obv,
-                      jcs_signals)
+                      jcs_signals,macd,buy_sell_macd)
 
 # Create your views here.
 def homePageView(request):
@@ -24,8 +24,10 @@ def nepseData(request):
             input_string = form.cleaned_data['input_string']
 
             upper_str= input_string.upper()
+            current_symbol = upper_str
             try:
                 df = stock_dataFrame(upper_str)
+                
                 
 
             except Exception as e:
@@ -62,6 +64,16 @@ def nepseData(request):
             # print(jcs_verdict)
             verdict["JCS"] = jcs_verdict
 
+            #Send data to MACD
+            macd_df = df.copy()
+            macd_df = macd(macd_df)
+            macd_df = buy_sell_macd(macd_df)
+            print(macd_df)
+            true_count = (macd_df['Buy_Sell'] == "Buy").sum()
+            print(true_count)
+            macd_verdict = macd_df.iloc[-1,-1]
+            verdict["MACD"] = macd_verdict
+
 
             print(verdict)
            
@@ -80,9 +92,11 @@ def nepseData(request):
 
 
             return render(request,"nepse/form.html",{'form':form,
+                                                     "current_symbol":current_symbol,
                                                      'processed_data_json':processed_data_json,
                                                      'column_names': column_names,
-                                                     "stock_symbols":stock_symbols})
+                                                     "stock_symbols":stock_symbols,
+                                                     "verdict":verdict})
         
     else:
         form = MyForm()

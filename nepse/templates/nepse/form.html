@@ -21,8 +21,29 @@
           </form>
         
         {{ error_message }}
+
+        {% if verdict %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Indicator</th>
+                    <th>Verdict</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for indicator, verdict_value in verdict.items %}
+                    <tr>
+                        <td>{{ indicator }}</td>
+                        <td>{{ verdict_value }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+
+
         <h2>
-            Data
+            Data of {{current_symbol}}
         </h2>
         
         {% if processed_data_json %}
