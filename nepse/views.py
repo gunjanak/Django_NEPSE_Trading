@@ -23,11 +23,17 @@ def nepseData(request):
         form = MyForm(request.POST)
         if form.is_valid():
             input_string = form.cleaned_data['input_string']
+            frequency = form.cleaned_data['frequency']
+            print("************************************************")
+            print(frequency)
 
             upper_str= input_string.upper()
             current_symbol = upper_str
             try:
-                df = stock_dataFrame(upper_str)
+                if frequency == "weekly":
+                    df = stock_dataFrame(upper_str,weekly=True)
+                else:
+                    df = stock_dataFrame(upper_str)
                 
                 
 
@@ -80,14 +86,14 @@ def nepseData(request):
             stochastic_df = stochastic_os(stochastic_df)
             stochastic_df = buy_sell_stochastic_os(stochastic_df)
             stochastic_os_verdict = stochastic_df.iloc[-1,-1]
-            print(stochastic_df)
+            # print(stochastic_df)
             verdict["Stochastic Oscillator"] = stochastic_os_verdict
 
             #Send data to adx
             adx_df = df.copy()
             adx_df = adx(df)
             adx_df = buy_sell_adx(adx_df)
-            print(adx_df)
+            # print(adx_df)
             adx_verdict = adx_df.iloc[-1,-1]
             verdict["ADX"] = adx_verdict
 
@@ -98,11 +104,14 @@ def nepseData(request):
 
 
             df = df.reset_index()
+            # print(df)
             df['Date'] = df['Date'].astype(str)
             processed_data = df[::-1]
+            print(processed_data)
             
             
             processed_data_json = processed_data.to_json(orient='records')
+            print(processed_data_json)
             
             # Extract column names
             column_names = processed_data.columns.tolist()

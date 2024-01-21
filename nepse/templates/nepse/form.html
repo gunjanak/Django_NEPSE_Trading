@@ -15,6 +15,17 @@
                     <option value="{{ symbol }}">
                 {% endfor %}
            </datalist>
+           <br>
+           {# Radio button for frequency selection #}
+           <label>
+                <input type="radio" name="frequency" value="daily">
+                Daily
+           </label>
+           <label>
+                <input type="radio" name="frequency" value="weekly">
+                Weekly
+           </label>
+           <br>
            <button type="submit">
             Submit
            </button>
@@ -80,15 +91,22 @@
 
         <script>
             document.addEventListener("DOMContentLoaded",function(){
-                var visibleRows = 20;
-                var totalRows = {{processed_data_json|length}};
-                var rowsLoaded  = visibleRows;
-                var jsonData = {{ processed_data_json|safe }}
+                var visibleRows = 10;
+                var rowsLoaded  = 0;
+                var jsonData = {{ processed_data_json|safe }};
                 var columnNames = {{column_names|safe }};
+                var totalRows = Object.keys(jsonData).length;
+                // console.log(typeof jsonData)
+                // console.log(totalRows);
+                // console.log(jsonData[0][columnNames[1]]);
+                // console.log(totalRows);
+                
+
 
                 function loadRows(){
                     var tableBody = document.getElementById('data-body');
                     for (var i =  rowsLoaded; i<rowsLoaded+visibleRows; i++) {
+                       
                         if (i >= totalRows){
                             console.log("Done");
                             document.getElementById('pagination-container').style.display = 'none';
@@ -100,6 +118,7 @@
                             var cell = document.createElement('td');
                             cell.textContent = jsonData[i][columnNames[j]];
                             row.appendChild(cell);
+                            // console.log(jsonData[i][columnNames[j]]);
                         }
                         tableBody.appendChild(row);
 
