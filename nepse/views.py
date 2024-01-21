@@ -47,11 +47,24 @@ def nepseData(request):
             # print(verdict)
 
             #Send data to calculate jcs signals
-            print(df)
+            # print(df)
             jcs_df = df.copy()
             jcs_df = jcs_signals(jcs_df)
             jcs_df = jcs_df[["Bullish swing","Bearish swing"]]
-            print(jcs_df)
+            # print(jcs_df.tail(2))
+            if jcs_df.iloc[-1]['Bullish swing']:
+                jcs_verdict = "Buy"
+            elif jcs_df.iloc[-1]['Bearish swing']:
+                jcs_verdict = "Sell"
+            else:
+                jcs_verdict = "Hold"
+            
+            # print(jcs_verdict)
+            verdict["JCS"] = jcs_verdict
+
+
+            print(verdict)
+           
             
 
 

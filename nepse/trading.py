@@ -56,7 +56,7 @@ def custom_business_week_mean(values):
     return working_days.mean()
 
 #function to read stock data from Nepalipaisa.com api
-def stock_dataFrame(stock_symbol,start_date='2023-01-01',weekly=False):
+def stock_dataFrame(stock_symbol,start_date='2020-12-01',weekly=False):
   """
   input : stock_symbol
             start_data set default at '2020-01-01'
@@ -190,20 +190,30 @@ def profit_obv(company_df,seed_money=10000):
 
 #Japanese candle stick
 def jcs_signals(df):
-    for i in range(2,df.shape[0]):
-      current = df.iloc[i,:]
-      prev = df.iloc[i-1,:]
-      prev_2 = df.iloc[i-2,:]
+ 
+  for i in range(2,df.shape[0]):
+ 
+    current = df.iloc[i,:]
 
-      realbody = abs(current['Open'] - current['Close'])
-      candle_range = current['High'] - current['Low']
+    prev = df.iloc[i-1,:]
+    prev_2 = df.iloc[i-2,:]
 
-      idx = df.index[i]
+    realbody = abs(current['Open'] - current['Close'])
+    candle_range = current['High'] - current['Low']
 
-      # Bullish swing
-      df.loc[idx,'Bullish swing'] = current['Low'] > prev['Low'] and prev['Low'] < prev_2['Low']
+    idx = df.index[i]
 
-      # Bearish swing
-      df.loc[idx,'Bearish swing'] = current['High'] < prev['High'] and prev['High'] > prev_2['High']
+    # Bullish swing
+    df.loc[idx,'Bullish swing'] = current['Low'] > prev['Low'] and prev['Low'] < prev_2['Low']
+    
+    # Bearish swing
+    df.loc[idx,'Bearish swing'] = current['High'] < prev['High'] and prev['High'] > prev_2['High']
 
-      return df
+    # # Bullish engulfing
+    # df.loc[idx,'Bullish engulfing'] = current['High'] > prev['High'] and current['Low'] < prev['Low'] and realbody >= 0.8 * candle_range and current['Close'] > current['Open']
+
+    # # Bearish engulfing
+    # df.loc[idx,'Bearish engulfing'] = current['High'] > prev['High'] and current['Low'] < prev['Low'] and realbody >= 0.8 * candle_range and current['Close'] < current['Open']
+
+
+  return df
