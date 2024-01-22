@@ -2,13 +2,17 @@ from django.shortcuts import render
 from django.http import HttpResponse
 
 import json
+import asyncio
 
 
 from .forms import MyForm,SimulationForm
 
+
 from .trading import (nepse_symbols, stock_dataFrame,obv_column,buy_sell_obv,
                       jcs_signals,macd,buy_sell_macd,stochastic_os,buy_sell_stochastic_os,
                       adx,buy_sell_adx)
+from .simulation import simulation
+
 
 # Create your views here.
 def homePageView(request):
@@ -146,7 +150,10 @@ def trading_simulation(request):
             form_data = {"Stock":input_string,
                          "Start Date":date_input,
                          "initial_capital":initial_capital,
-                         "inicators":indicators}
+                         "indicators":indicators}
+            
+            # simulation(form_data)
+            asyncio.run(simulation(form_data))
 
         return render(request,"nepse/simulation.html",{'form':form,
                                                        "stock_symbols":stock_symbols,

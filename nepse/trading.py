@@ -160,7 +160,7 @@ def profit_obv(company_df,seed_money=10000):
   last_buy_price = 0
   flag = 0
   for i in range(length):
-    if((company_df3['Buy_Sell'][i] == 2)&(flag == 0)):
+    if((company_df3['Buy_Sell'][i] == "Buy")&(flag == 0)):
       #print('Buying share at: ')
       #print(company_df3['Close'][i])
       #print('Date: ')
@@ -173,7 +173,7 @@ def profit_obv(company_df,seed_money=10000):
       #print('\n')
       flag = 1
 
-    elif((company_df3['Buy_Sell'][i] == -2) & (company_df3['Close'][i] > last_buy_price) & (flag == 1)):
+    elif((company_df3['Buy_Sell'][i] == "Sell") & (company_df3['Close'][i] > last_buy_price) & (flag == 1)):
       #print('Selling share at: ')
       #print(company_df3['Close'][i])
       new_money = shares*company_df3['Close'][i]
@@ -219,7 +219,55 @@ def jcs_signals(df):
 
   return df
 
+def profit_jcs(company_df,seed_money=10000):
+  money = seed_money
+  shares = 0
+  last_buy_price = 0
+  flag = 0
+  net_worth = []
+  net_worth_value = money
+  length = len(company_df)
+  company_df = company_df.reset_index()
 
+  for i in range(length):
+    if((company_df['Bullish swing'][i]==True)&(flag == 0)):
+      # print('Buying share at: ')
+      # print(company_df['Close'][i])
+      # print('Date: ')
+      # print(company_df['Date'][i])
+      shares = math.floor(money/company_df['Close'][i])
+      # print(shares)
+      money = money - shares*company_df['Close'][i]
+      last_buy_price = company_df['Close'][i]
+      # print(money)
+      net_worth_value = shares*company_df['Close'][i] + money
+      net_worth.append(net_worth_value)
+      # print('\n')
+      flag = 1
+
+    elif((company_df['Bearish swing'][i]==True)&(flag == 1)):
+      # print('Selling share at: ')
+      # print(company_df['Close'][i])
+      new_money = shares*company_df['Close'][i]
+      shares = 0
+      #print(new_money)
+      money = money + new_money
+      # print(money)
+      net_worth_value = money
+      net_worth.append(net_worth_value)
+      # print('\n\n')
+      flag = 0
+    else:
+      if(flag == 1):
+        net_worth_value = shares*company_df['Close'][i] + money
+        net_worth.append(net_worth_value)
+      else:
+        net_worth.append(net_worth_value)
+
+  length = len(net_worth)
+  final_money = shares*company_df['Close'][length-1] + money
+
+  return [final_money,shares,money]
 
 
 #MACD
