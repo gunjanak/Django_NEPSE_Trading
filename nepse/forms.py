@@ -44,3 +44,9 @@ class SimulationForm(forms.Form):
         choices=checkbox_choices,
         widget=forms.CheckboxSelectMultiple,
     )
+
+    def clean_checkboxes(self):
+        selected_indicators = self.cleaned_data.get('checkboxes')
+        if not selected_indicators:
+            raise forms.ValidationError("Select at least one indicator.")
+        return selected_indicators

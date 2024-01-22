@@ -4,6 +4,7 @@
         Simulation Page
     </title>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 
 </head>
 
@@ -33,5 +34,32 @@
       </form>
 
       {{form_data}}
+      <br>
+      {{result}}
+
+      <h3>Simulation Result</h3>
+      <div class="container mt-5">
+        <h2 class="text-center">Simulation Results</h2>
+
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+      <table border="1">
+        <tr>
+            <th>Indicator</th>
+            <Result></Result>
+        </tr>
+        {% for indicator_result in result%}
+            {% for key,value in indicator_result.items %}
+                <tr>
+                    <td>{{ key }}</td>
+                    <td> {{value.0}}</td>
+                </tr>
+
+            {% endfor %}
+        {% endfor %}
+      </table>
+      </div>
+      </div>
+      </div>
       
 </body>

@@ -7,6 +7,9 @@ import requests
 import re
 import math
 import talib as ta
+import warnings
+warnings.filterwarnings('ignore')
+
 #All the stock symbols
 def nepse_symbols():
     path = 'https://merolagani.com/LatestMarket.aspx'
@@ -184,7 +187,7 @@ def profit_obv(company_df,seed_money=10000):
       #print('\n\n')
       flag = 0
 
-  final_money = shares*company_df3['Close'][-1] + money
+  final_money = round(shares*company_df3['Close'][-1] + money,1)
   return [final_money,shares,money]
 
 
@@ -265,7 +268,7 @@ def profit_jcs(company_df,seed_money=10000):
         net_worth.append(net_worth_value)
 
   length = len(net_worth)
-  final_money = shares*company_df['Close'][length-1] + money
+  final_money = round(shares*company_df['Close'][length-1] + money,1)
 
   return [final_money,shares,money]
 
@@ -314,14 +317,14 @@ def profit_macd(company_df,seed_money=10000):
   last_buy_price = 0
   flag = 0
   for i in range(length):
-    if ((company_df3['Buy_Sell'][i] == 2)&(flag == 0)):
+    if ((company_df3['Buy_Sell'][i] == "Buy")&(flag == 0)):
       shares = math.floor(money/company_df3['Close'][i])
      
       money = money - shares*company_df3['Close'][i]
       last_buy_price = company_df3['Close'][i]
       flag = 1
 
-    elif ((company_df3['Buy_Sell'][i] == -2) & (company_df3['Close'][i] > last_buy_price) & (flag == 1)):
+    elif ((company_df3['Buy_Sell'][i] == "Sell") & (company_df3['Close'][i] > last_buy_price) & (flag == 1)):
      
       new_money = shares*company_df3['Close'][i]
       shares = 0
@@ -330,7 +333,7 @@ def profit_macd(company_df,seed_money=10000):
  
       flag = 0
 
-  return [shares*company_df3['Close'][-1] + money,shares,money]
+  return [round(shares*company_df3['Close'][-1] + money,1),shares,money]
 
 
 #Stochastic oscillator
@@ -363,6 +366,41 @@ def buy_sell_stochastic_os(df):
   
   df['Buy_Sell'] = buy_sell
   return df
+
+def profit_stochastic_os(df,seed_money=10000):
+  company_df6 = df
+  length = len(company_df6)
+  money = seed_money
+  shares = 0
+  last_buy_price = 0
+  flag = 0
+  for i in range(length):
+    if((company_df6['Buy_Sell'][i] == "Buy")&(flag == 0)):
+      # print('Buying share at: ')
+      # print(company_df6['Close'][i])
+      # print('Date: ')
+      # print(company_df6.index[i])
+      shares = math.floor(money/company_df6['Close'][i])
+      # print(shares)
+      money = money - shares*company_df6['Close'][i]
+      last_buy_price = company_df6['Close'][i]
+      # print(money)
+      # print('\n')
+      flag = 1
+
+    elif((company_df6['Buy_Sell'][i] == "Sell") & (company_df6['Close'][i] > last_buy_price) & (flag == 1)):
+      # print('Selling share at: ')
+      # print(company_df6['Close'][i])
+      new_money = shares*company_df6['Close'][i]
+      shares = 0
+      # print(new_money)
+      money = money + new_money
+      # print(money)
+      # print('\n\n')
+      flag = 0
+  return [round(shares*company_df6['Close'][-1] + money,1),shares,money]
+
+
 
 
 #ADX
@@ -406,3 +444,36 @@ def buy_sell_adx(df):
   return df
 
 
+def profit_adx(df,seed_money=10000):
+  company_df3 = df
+  length = len(company_df3)
+  money = seed_money
+  shares = 0
+  last_buy_price = 0
+  flag = 0
+  for i in range(length):
+    if ((company_df3['Buy_Sell'][i] == "Buy")&(flag == 0)):
+      print('Buying share at: ')
+      print(company_df3['Close'][i])
+      print('Date: ')
+      print(company_df3.index[i])
+      shares = math.floor(money/company_df3['Close'][i])
+      print(shares)
+      money = money - shares*company_df3['Close'][i]
+      last_buy_price = company_df3['Close'][i]
+      print(money)
+      print('\n')
+      flag = 1
+
+    elif ((company_df3['Buy_Sell'][i] == "Sell") & (company_df3['Close'][i] > last_buy_price) & (flag == 1)):
+      print('Selling share at: ')
+      print(company_df3['Close'][i])
+      new_money = shares*company_df3['Close'][i]
+      shares = 0
+      print(new_money)
+      money = money + new_money
+      print(money)
+      print('\n\n')
+      flag = 0
+
+  return [round(shares*company_df3['Close'][-1] + money,1),shares,money]

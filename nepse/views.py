@@ -153,11 +153,14 @@ def trading_simulation(request):
                          "indicators":indicators}
             
             # simulation(form_data)
-            asyncio.run(simulation(form_data))
+            result = asyncio.run(simulation(form_data))
+            print("Simulation results: ",result)
+            
 
-        return render(request,"nepse/simulation.html",{'form':form,
+            return render(request,"nepse/simulation.html",{'form':form,
                                                        "stock_symbols":stock_symbols,
-                                                       "form_data":form_data})
+                                                       "form_data":form_data,
+                                                       "result":result})
 
     else:
         form = SimulationForm()
