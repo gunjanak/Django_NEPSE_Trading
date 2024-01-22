@@ -4,7 +4,7 @@ from django.http import HttpResponse
 import json
 
 
-from .forms import MyForm
+from .forms import MyForm,SimulationForm
 
 from .trading import (nepse_symbols, stock_dataFrame,obv_column,buy_sell_obv,
                       jcs_signals,macd,buy_sell_macd,stochastic_os,buy_sell_stochastic_os,
@@ -129,3 +129,31 @@ def nepseData(request):
 
     return render(request,'nepse/form.html',{'form':form,
                                              "stock_symbols":stock_symbols})
+
+
+
+def trading_simulation(request):
+    stock_symbols = nepse_symbols()
+    if request.method == "POST":
+        form = SimulationForm(request.POST)
+        if form.is_valid():
+            input_string = form.cleaned_data['input_string']
+            date_input = form.cleaned_data['date_input']
+            initial_capital = form.cleaned_data['positive_number']
+            indicators = form.cleaned_data['checkboxes']
+
+
+            form_data = {"Stock":input_string,
+                         "Start Date":date_input,
+                         "initial_capital":initial_capital,
+                         "inicators":indicators}
+
+        return render(request,"nepse/simulation.html",{'form':form,
+                                                       "stock_symbols":stock_symbols,
+                                                       "form_data":form_data})
+
+    else:
+        form = SimulationForm()
+
+    return render(request,"nepse/simulation.html",{'form':form,
+                                                   "stock_symbols":stock_symbols})
