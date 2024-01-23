@@ -1,7 +1,11 @@
 import asyncio
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+
 import warnings
 warnings.filterwarnings('ignore')
-from nepse.trading import (stock_dataFrame,obv_column,buy_sell_obv,profit_obv,
+from nepse.trading import (stock_dataFrame,obv_column,buy_sell_obv,profit_obv,plot_obv_graph,
                            jcs_signals,profit_jcs,macd,buy_sell_macd,profit_macd,
                            stochastic_os,buy_sell_stochastic_os,profit_stochastic_os,
                            adx,buy_sell_adx,profit_adx)
@@ -10,7 +14,7 @@ async def run_indicator_function(indicator_function,df,seed_money=10000):
     net_worths = {}
     loop = asyncio.get_event_loop()
     result = await loop.run_in_executor(None,indicator_function,df,seed_money)
-    print(f"{indicator_function.__name__} result:{result}")
+    # print(f"{indicator_function.__name__} result:{result}")
     net_worths[indicator_function.__name__] = result
     return net_worths
 
@@ -47,10 +51,11 @@ def obv_function(df,seed_money):
     obv_df = obv_column(df)
     obv_df = buy_sell_obv(df)
     obv_profit = profit_obv(obv_df,seed_money) 
+    plot_obv = plot_obv_graph(obv_df)
     # print(obv_profit)
 
 
-    return obv_profit
+    return [obv_profit,plot_obv]
 
 def jcs_function(df,seed_money):
     print("Calling JCS function")

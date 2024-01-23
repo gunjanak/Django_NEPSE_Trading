@@ -7,6 +7,11 @@ import requests
 import re
 import math
 import talib as ta
+
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -189,6 +194,33 @@ def profit_obv(company_df,seed_money=10000):
 
   final_money = round(shares*company_df3['Close'][-1] + money,1)
   return [final_money,shares,money]
+
+def plot_obv_graph(df):
+  print("generating plot for obv")
+  obv_df = df
+  df_to_plot = obv_df.iloc[:,-2:]
+  df_to_plot = df_to_plot.reset_index()
+  print(df_to_plot)
+  fig = px.line(df_to_plot,x='Date',y='OBV',title="OBV Chart with Buy/Sell Markers")
+
+  #Add Markers for Buy and Sell events
+  buy_events = df_to_plot[df_to_plot["Buy_Sell"]=="Buy"]
+  sell_events = df_to_plot[df_to_plot["Buy_Sell"] == "Sell"]
+
+  #Add traces directly from the Dataframe
+  fig.add_trace(go.Scatter(x=buy_events['Date'],y=buy_events['OBV'],
+                            mode='markers',marker=dict(color='blue',symbol='circle-dot'),
+                            name='Buy'))
+  fig.add_trace(go.Scatter(x=sell_events['Date'],y=sell_events['OBV'],
+                            mode='markers',marker=dict(color='red',symbol='x'),
+                            name='Sell'))
+  fig.update_layout(showlegend=False)
+  # Increase the height of the figure
+  fig.update_layout(height=600)
+
+  plot_obv = fig.to_html(full_html=False)
+
+  return plot_obv
 
 
 
