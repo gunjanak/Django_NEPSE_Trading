@@ -6,7 +6,8 @@ import plotly.graph_objects as go
 import warnings
 warnings.filterwarnings('ignore')
 from nepse.trading import (stock_dataFrame,obv_column,buy_sell_obv,profit_obv,plot_obv_graph,
-                           jcs_signals,profit_jcs,macd,buy_sell_macd,profit_macd,
+                           jcs_signals,profit_jcs,buy_sell_jcs,plot_jcs_graph,
+                           macd,buy_sell_macd,profit_macd,
                            stochastic_os,buy_sell_stochastic_os,profit_stochastic_os,
                            adx,buy_sell_adx,profit_adx)
 
@@ -60,9 +61,12 @@ def obv_function(df,seed_money):
 def jcs_function(df,seed_money):
     print("Calling JCS function")
     jcs_df = jcs_signals(df)
+    jcs_df = buy_sell_jcs(jcs_df)
+    plot_jcs = plot_jcs_graph(jcs_df)
+    
     jcs_profit = profit_jcs(jcs_df,seed_money)
     # print(jcs_profit)
-    return jcs_profit
+    return [jcs_profit,plot_jcs]
 
 def macd_function(df,seed_money):
     print("Calling MACD function")

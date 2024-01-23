@@ -254,56 +254,101 @@ def jcs_signals(df):
 
   return df
 
+def buy_sell_jcs(df):
+  
+  company_df = df.dropna()
+  # print(company_df)
+  length = len(company_df)
+  print(length)
+  buy_sell = []
+  signal = 0
+  for i in range(length):
+    if (company_df["Bullish swing"][i] == True):
+      signal = "Buy"
+      buy_sell.append(signal)
+    elif (company_df["Bearish swing"][i] == True):
+      signal = "Sell"
+      buy_sell.append(signal)
+    else:
+      signal = "Hold"
+      buy_sell.append(signal)
+
+  print(len(buy_sell))
+  company_df3 = company_df
+  # Drop first row
+  # company_df3.drop(index=company_df3.index[0], axis=0, inplace=True)
+  #print(len(buy_sell))
+  company_df3['Buy_Sell'] = buy_sell
+  
+
+  return company_df3
+
+
 def profit_jcs(company_df,seed_money=10000):
+  company_df3 = company_df
+  length = len(company_df3)
   money = seed_money
   shares = 0
   last_buy_price = 0
   flag = 0
-  net_worth = []
-  net_worth_value = money
-  length = len(company_df)
-  company_df = company_df.reset_index()
-
   for i in range(length):
-    if((company_df['Bullish swing'][i]==True)&(flag == 0)):
-      # print('Buying share at: ')
-      # print(company_df['Close'][i])
-      # print('Date: ')
-      # print(company_df['Date'][i])
-      shares = math.floor(money/company_df['Close'][i])
-      # print(shares)
-      money = money - shares*company_df['Close'][i]
-      last_buy_price = company_df['Close'][i]
-      # print(money)
-      net_worth_value = shares*company_df['Close'][i] + money
-      net_worth.append(net_worth_value)
-      # print('\n')
+    if((company_df3['Buy_Sell'][i] == "Buy")&(flag == 0)):
+      shares = math.floor(money/company_df3['Close'][i])
+      #print(shares)
+      money = money - shares*company_df3['Close'][i]
+      last_buy_price = company_df3['Close'][i]
       flag = 1
 
-    elif((company_df['Bearish swing'][i]==True)&(flag == 1)):
-      # print('Selling share at: ')
-      # print(company_df['Close'][i])
-      new_money = shares*company_df['Close'][i]
+    elif((company_df3['Buy_Sell'][i] == "Sell") & (company_df3['Close'][i] > last_buy_price) & (flag == 1)):
+      new_money = shares*company_df3['Close'][i]
       shares = 0
-      #print(new_money)
       money = money + new_money
-      # print(money)
-      net_worth_value = money
-      net_worth.append(net_worth_value)
-      # print('\n\n')
       flag = 0
-    else:
-      if(flag == 1):
-        net_worth_value = shares*company_df['Close'][i] + money
-        net_worth.append(net_worth_value)
-      else:
-        net_worth.append(net_worth_value)
 
-  length = len(net_worth)
-  final_money = round(shares*company_df['Close'][length-1] + money,1)
-
+  final_money = round(shares*company_df3['Close'][-1] + money,1)
   return [final_money,shares,money]
 
+def plot_jcs_graph(df):
+  print("Create a candle stick chart")
+  df = df.reset_index()
+  selected_columns = ['Date', 'High', 'Low','Open','Close','Buy_Sell']
+  df = df[selected_columns]
+  print(df.tail(10))
+  fig = go.Figure(data=[go.Candlestick(x=df['Date'],
+                                       open=df['Open'],
+                                       high=df['High'],
+                                       low=df['Low'],
+                                       close=df['Close'])])
+  
+  # Add a line plot for 'Close'
+  fig.add_trace(go.Scatter(x=df['Date'], y=df['Close'], mode='lines', name='Close',line=dict(color='black')))
+
+  #Add markers for 'Buy' and 'Sell'
+  buy_events = df[df["Buy_Sell"] == 'Buy']
+  sell_events = df[df['Buy_Sell'] == "Sell"]
+
+  fig.add_trace(go.Scatter(x=buy_events['Date'],y=buy_events['Close'],
+                           mode='markers',marker=dict(color='blue',symbol='circle-dot'),
+                           name='Buy'))
+  
+  fig.add_trace(go.Scatter(x=sell_events['Date'],y=sell_events['Close'],
+                           mode='markers',marker=dict(color='red',symbol='x'),
+                           name='Sell'))
+  
+  #customize the layout
+  fig.update_layout(title="Japanese Candlestick Chart",
+                    xaxis_title="Date",
+                    yaxis_title="Price",
+                    xaxis_rangeslider_visible=False)
+  
+  # Increase the height of the figure
+  fig.update_layout(height=700)
+  #Convert the Plotly figure to HTML
+  plot_div = fig.to_html(full_html=False)
+
+  
+
+  return plot_div
 
 #MACD
 
