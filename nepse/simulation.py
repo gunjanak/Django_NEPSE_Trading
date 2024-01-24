@@ -7,7 +7,7 @@ import warnings
 warnings.filterwarnings('ignore')
 from nepse.trading import (stock_dataFrame,obv_column,buy_sell_obv,profit_obv,plot_obv_graph,
                            jcs_signals,profit_jcs,buy_sell_jcs,plot_jcs_graph,
-                           macd,buy_sell_macd,profit_macd,
+                           macd,buy_sell_macd,profit_macd,plot_macd_graph,
                            stochastic_os,buy_sell_stochastic_os,profit_stochastic_os,
                            adx,buy_sell_adx,profit_adx)
 
@@ -72,9 +72,12 @@ def macd_function(df,seed_money):
     print("Calling MACD function")
     macd_df = macd(df)
     macd_df = buy_sell_macd(macd_df)
+    plot_macd = plot_macd_graph(macd_df)
+    
+    print(macd_df.iloc[:,-6:].head(10))
     macd_profit = profit_macd(macd_df,seed_money)
     # print(macd_profit)
-    return macd_profit
+    return [macd_profit,plot_macd]
 
 def stochastic_os_function(df,seed_money):
     print("Calling Stochastic Oscillator")

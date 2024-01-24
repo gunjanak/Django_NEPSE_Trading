@@ -12,6 +12,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
+
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -181,7 +182,7 @@ def profit_obv(company_df,seed_money=10000):
       #print('\n')
       flag = 1
 
-    elif((company_df3['Buy_Sell'][i] == "Sell") & (company_df3['Close'][i] > last_buy_price) & (flag == 1)):
+    elif((company_df3['Buy_Sell'][i] == "Sell")  & (flag == 1)):
       #print('Selling share at: ')
       #print(company_df3['Close'][i])
       new_money = shares*company_df3['Close'][i]
@@ -299,7 +300,7 @@ def profit_jcs(company_df,seed_money=10000):
       last_buy_price = company_df3['Close'][i]
       flag = 1
 
-    elif((company_df3['Buy_Sell'][i] == "Sell") & (company_df3['Close'][i] > last_buy_price) & (flag == 1)):
+    elif((company_df3['Buy_Sell'][i] == "Sell") & (flag == 1)):
       new_money = shares*company_df3['Close'][i]
       shares = 0
       money = money + new_money
@@ -349,6 +350,8 @@ def plot_jcs_graph(df):
   
 
   return plot_div
+
+
 
 #MACD
 
@@ -401,7 +404,7 @@ def profit_macd(company_df,seed_money=10000):
       last_buy_price = company_df3['Close'][i]
       flag = 1
 
-    elif ((company_df3['Buy_Sell'][i] == "Sell") & (company_df3['Close'][i] > last_buy_price) & (flag == 1)):
+    elif ((company_df3['Buy_Sell'][i] == "Sell") & (flag == 1)):
      
       new_money = shares*company_df3['Close'][i]
       shares = 0
@@ -411,6 +414,48 @@ def profit_macd(company_df,seed_money=10000):
       flag = 0
 
   return [round(shares*company_df3['Close'][-1] + money,1),shares,money]
+
+def plot_macd_graph(df):
+  print("Create a macd chart")
+  df = df.reset_index()
+  selected_columns = ['Date','EMA_9','MACD', 'MACD_signal','MACD_Diff','Buy_Sell']
+  df = df[selected_columns]
+  df['Date'] = pd.to_datetime(df['Date'])
+  print(type(df['MACD'][0]))
+  print(type(df['MACD_signal'][0]))
+  fig = go.Figure()
+  fig.add_trace(go.Scatter(x=df['Date'],y=df['MACD'],mode='lines',name='MACD'))
+  fig.add_trace(go.Scatter(x=df["Date"],y=df["MACD_signal"],mode="lines",name="MACD Signal"))
+
+  # #Mark Buy events with blue dots
+  buy_events = df[df['Buy_Sell'] == 'Buy']
+  fig.add_trace(go.Scatter(x=buy_events['Date'],y=buy_events['MACD'],
+                            mode='markers',marker=dict(color='blue',symbol='circle-dot'),
+                            name='Buy'))
+  
+  sell_events = df[df['Buy_Sell'] == 'Sell']
+  fig.add_trace(go.Scatter(x=sell_events['Date'],y=sell_events['MACD'],
+                            mode='markers',marker=dict(color='red',symbol='cross'),
+                            name='Sell'))
+  
+  # Add MACD_diff as a bar plot with different colors for positive and negative values
+  fig.add_trace(go.Bar(x=df['Date'], y=df['MACD_Diff'],
+                     marker_color=['pink' if val > 0 else 'orange' for val in df['MACD_Diff']],
+                     opacity=0.7, name='MACD Difference'))
+
+  #Customize the layout
+  fig.update_layout(title="MACD",
+                    xaxis_title="Date",
+                    yaxis_title="Values")
+  
+  # Increase the height of the figure
+  fig.update_layout(height=700)
+
+  
+  #convert the Plotly figure to HTML
+  plt_div = fig.to_html(full_html=False)
+
+  return plt_div
 
 
 #Stochastic oscillator
@@ -465,7 +510,7 @@ def profit_stochastic_os(df,seed_money=10000):
       # print('\n')
       flag = 1
 
-    elif((company_df6['Buy_Sell'][i] == "Sell") & (company_df6['Close'][i] > last_buy_price) & (flag == 1)):
+    elif((company_df6['Buy_Sell'][i] == "Sell")  & (flag == 1)):
       # print('Selling share at: ')
       # print(company_df6['Close'][i])
       new_money = shares*company_df6['Close'][i]
@@ -542,7 +587,7 @@ def profit_adx(df,seed_money=10000):
       print('\n')
       flag = 1
 
-    elif ((company_df3['Buy_Sell'][i] == "Sell") & (company_df3['Close'][i] > last_buy_price) & (flag == 1)):
+    elif ((company_df3['Buy_Sell'][i] == "Sell") & (flag == 1)):
       print('Selling share at: ')
       print(company_df3['Close'][i])
       new_money = shares*company_df3['Close'][i]
