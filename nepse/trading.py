@@ -451,7 +451,7 @@ def plot_macd_graph(df):
   # Increase the height of the figure
   fig.update_layout(height=700)
 
-  
+
   #convert the Plotly figure to HTML
   plt_div = fig.to_html(full_html=False)
 
@@ -522,6 +522,53 @@ def profit_stochastic_os(df,seed_money=10000):
       flag = 0
   return [round(shares*company_df6['Close'][-1] + money,1),shares,money]
 
+def plot_stochastic_os_graph(df):
+  print("Create a Stochastic OS chart")
+  df = df.reset_index()
+  selected_columns = ['Date','Slowk','Slowd','Buy_Sell']
+  df = df[selected_columns]
+  df['Date'] = pd.to_datetime(df['Date'])
+  
+  fig = go.Figure()
+  fig.add_trace(go.Scatter(x=df['Date'],y=df['Slowk'],mode='lines',name='Slow k'))
+  fig.add_trace(go.Scatter(x=df["Date"],y=df["Slowd"],mode="lines",name="Slow d"))
+
+  #Add markers for 'Buy' and 'Sell'
+  buy_events = df[df["Buy_Sell"] == 'Buy']
+  sell_events = df[df['Buy_Sell'] == "Sell"]
+
+  fig.add_trace(go.Scatter(x=buy_events['Date'],y=buy_events['Slowk'],
+                           mode='markers',marker=dict(color='blue',symbol='circle-dot'),
+                           name='Buy'))
+  
+  fig.add_trace(go.Scatter(x=sell_events['Date'],y=sell_events['Slowd'],
+                           mode='markers',marker=dict(color='red',symbol='x'),
+                           name='Sell'))
+  
+
+  # Add horizontal lines at 80 and 20
+  fig.add_shape(
+        dict(type="line", x0=df['Date'].min(), x1=df['Date'].max(), y0=80, y1=80,
+             line=dict(color="goldenrod", width=2), name="Overbought (80)"))
+
+  fig.add_shape(
+        dict(type="line", x0=df['Date'].min(), x1=df['Date'].max(), y0=20, y1=20,
+             line=dict(color="goldenrod", width=2), name="Oversold (20)"))
+  
+
+  #Customize the layout
+  fig.update_layout(title="Stochastic Oscillator",
+                    xaxis_title="Date",
+                    yaxis_title="Values")
+  
+  # Increase the height of the figure
+  fig.update_layout(height=700)
+
+  
+  #convert the Plotly figure to HTML
+  plt_div = fig.to_html(full_html=False)
+
+  return plt_div
 
 
 
@@ -547,7 +594,7 @@ def buy_sell_adx(df):
   length = len(df)
   buy_sell = []
   for i in range(1,(length),1):
-    if (df['avg'][i]>20):
+    if (df['avg'][i]>25):
       if (df['Diff'][i]<0) & (df['Diff'][i-1]>0):
         buy_sell.append("Sell")
       elif (df['Diff'][i]>0) & (df['Diff'][i-1]<0):
@@ -599,3 +646,53 @@ def profit_adx(df,seed_money=10000):
       flag = 0
 
   return [round(shares*company_df3['Close'][-1] + money,1),shares,money]
+
+
+
+
+def plot_adx_graph(df):
+  print("Create a adx chart")
+  df = df.reset_index()
+  # selected_columns = ['Date','Slowk','Slowd','Buy_Sell']
+  # df = df[selected_columns]
+  df['Date'] = pd.to_datetime(df['Date'])
+  
+  fig = go.Figure()
+  fig.add_trace(go.Scatter(x=df['Date'],y=df['avg'],mode='lines',name='AVG'))
+  fig.add_trace(go.Scatter(x=df["Date"],y=df["Plus_DI"],mode="lines",name="Plus DI"))
+  fig.add_trace(go.Scatter(x=df["Date"],y=df["Minus_DI"],mode="lines",name="Minus DI"))
+
+
+  #Add markers for 'Buy' and 'Sell'
+  buy_events = df[df["Buy_Sell"] == 'Buy']
+  sell_events = df[df['Buy_Sell'] == "Sell"]
+
+  fig.add_trace(go.Scatter(x=buy_events['Date'],y=buy_events['avg'],
+                           mode='markers',marker=dict(color='blue',symbol='circle-dot'),
+                           name='Buy'))
+  
+  fig.add_trace(go.Scatter(x=sell_events['Date'],y=sell_events['avg'],
+                           mode='markers',marker=dict(color='red',symbol='x'),
+                           name='Sell'))
+  
+
+  # Add horizontal lines at 25
+  fig.add_shape(
+        dict(type="line", x0=df['Date'].min(), x1=df['Date'].max(), y0=25, y1=25,
+             line=dict(color="goldenrod", width=2), name="25"))
+
+  
+
+  #Customize the layout
+  fig.update_layout(title="ADX",
+                    xaxis_title="Date",
+                    yaxis_title="Values")
+  
+  # Increase the height of the figure
+  fig.update_layout(height=700)
+
+  
+  #convert the Plotly figure to HTML
+  plt_div = fig.to_html(full_html=False)
+
+  return plt_div

@@ -8,8 +8,8 @@ warnings.filterwarnings('ignore')
 from nepse.trading import (stock_dataFrame,obv_column,buy_sell_obv,profit_obv,plot_obv_graph,
                            jcs_signals,profit_jcs,buy_sell_jcs,plot_jcs_graph,
                            macd,buy_sell_macd,profit_macd,plot_macd_graph,
-                           stochastic_os,buy_sell_stochastic_os,profit_stochastic_os,
-                           adx,buy_sell_adx,profit_adx)
+                           stochastic_os,buy_sell_stochastic_os,profit_stochastic_os,plot_stochastic_os_graph,
+                           adx,buy_sell_adx,profit_adx,plot_adx_graph)
 
 async def run_indicator_function(indicator_function,df,seed_money=10000):
     net_worths = {}
@@ -73,8 +73,6 @@ def macd_function(df,seed_money):
     macd_df = macd(df)
     macd_df = buy_sell_macd(macd_df)
     plot_macd = plot_macd_graph(macd_df)
-    
-    print(macd_df.iloc[:,-6:].head(10))
     macd_profit = profit_macd(macd_df,seed_money)
     # print(macd_profit)
     return [macd_profit,plot_macd]
@@ -83,14 +81,17 @@ def stochastic_os_function(df,seed_money):
     print("Calling Stochastic Oscillator")
     stochastic_os_df = stochastic_os(df)
     stochastic_os_df = buy_sell_stochastic_os(stochastic_os_df)
+    plot_stochastic_os = plot_stochastic_os_graph(stochastic_os_df)
     stochastic_os_profit = profit_stochastic_os(stochastic_os_df,seed_money)
     # print(stochastic_os_profit)
-    return stochastic_os_profit
+    return [stochastic_os_profit,plot_stochastic_os]
 
 def adx_function(df,seed_money):
     print("Calling ADX function")
     adx_df = adx(df)
     adx_df = buy_sell_adx(adx_df)
+    print(adx_df.head(10))
+    plot_adx = plot_adx_graph(adx_df)
     adx_profit = profit_adx(adx_df,seed_money)
     print(adx_profit)
-    return adx_profit
+    return [adx_profit,plot_adx]

@@ -35,8 +35,9 @@ class SimulationForm(forms.Form):
         ('OBV','OBV'),
         ("JCS","JCS"),
         ("MACD","MACD"),
-        ("ADX","ADX"),
         ("Stochastic OS","Stochastic OS"),
+        ("ADX","ADX"),
+        
     ]
 
     checkboxes = forms.MultipleChoiceField(
